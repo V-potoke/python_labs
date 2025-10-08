@@ -110,7 +110,7 @@ print(flatten([[1, 2], (3, 4, 5)]))
 print(flatten([[1], [], [2, 3]]))
 print(flatten([[1, 2], "ab"]))
 ```
-![Картинка 1](./images/lab02/img01.png)
+![Картинка 01](./images/lab02/img01.png)
 
 ### Задание номер 2
 ``` python
@@ -165,7 +165,7 @@ print(col_sums([[-1, 1], [10, -10]]))
 print(col_sums([[0, 0], [0, 0]]))
 print(col_sums([[1, 2], [3]]))
 ```
-![Картинка 1](./images/lab02/img02.png)
+![Картинка 02](./images/lab02/img02.png)
 
 ### Задание номер 3
 ``` python
@@ -188,4 +188,4 @@ print(format_record(("Петров Пётр", "IKBO-12", 5.0)))
 print(format_record(("Петров Пётр Петрович", "IKBO-12", 5.0)))
 print(format_record(("  сидорова  анна   сергеевна ", "ABB-01", 3.999)))
 ```
-![Картинка 1](./images/lab02/img03.png)
+![Картинка 03](./images/lab02/img03.png)
