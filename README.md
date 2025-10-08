@@ -177,10 +177,10 @@ def format_record(t):
         return TypeError
     if len(fio.split()) == 3:
         l1, l2 = fio.split()[1], fio.split()[2]
-        return fio.split()[0].capitalize() + ' ' + l1[0].upper() + '. ' + l2[0].upper() + '., гр. ' + group + ', GPA ' + str(gpa)
+        return fio.split()[0].capitalize() + ' ' + l1[0].upper() + '. ' + l2[0].upper() + '., гр. ' + group + ', GPA ' + f'{gpa:.2f}'
     else:
         l1 = fio.split()[1]
-        return fio.split()[0].capitalize() + ' ' + l1[0].upper() + '., гр. ' + group + ', GPA ' + str(gpa)
+        return fio.split()[0].capitalize() + ' ' + l1[0].upper() + '., гр. ' + group + ', GPA ' + f'{gpa:.2f}'
 
 
 print(format_record(("Иванов Иван Иванович", "BIVT-25", 4.6)))
