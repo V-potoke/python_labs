@@ -189,3 +189,60 @@ print(format_record(("Петров Пётр Петрович", "IKBO-12", 5.0)))
 print(format_record(("  сидорова  анна   сергеевна ", "ABB-01", 3.999)))
 ```
 ![Картинка 03](./images/lab02/img03.png)
+
+
+
+## Лабораторная работа 3
+
+### Задание номер A
+``` python
+def normalize(text: str, *, casefold: bool = True, yo2e: bool = True):
+    if casefold: text = text.casefold()
+    if yo2e: text = text.replace('Ё', 'Е').replace('ё', 'е')
+    text = text.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ').strip()
+    while '  ' in text: text = text.replace('  ', ' ')
+    return text
+
+
+def tokenize(text):
+    return re.findall(r'\w+[-]\w+|\w+', text.lower())
+
+
+def count_freq(tokens):
+    t = {}
+    while tokens:
+        t[tokens[0]] = tokens.count(tokens[0])
+        tokens = [x for x in tokens if x != tokens[0]]
+    return t
+
+
+def top_n(freq, n):
+    top_n = []
+    freq = sorted(freq.items(), key=lambda item: [-item[1], item[0]])
+    for i in range(min(n, len(freq))):
+        top_n.append(freq[i])
+    return top_n
+```
+![Картинка 01](./images/lab03/imgA.png)
+
+### Задание номер B
+``` python
+NICE_CONCLUSION = True
+text = sys.stdin.read()
+text = normalize(text)
+tokens = tokenize(text)
+top = top_n(count_freq(tokens), len(tokens))
+print(f'Всего слов: {len(tokens)}')
+print(f'Уникальных слов: {len(set(tokens))}')
+print('Топ-5:')
+if NICE_CONCLUSION:
+    mx_len = max(5, len(max(tokens, key=len)))
+    print('слово' + ' ' * (mx_len - 5) + ' | ' + 'частота')
+    print('-' * (mx_len + 10))
+    for i in top:
+        print(i[0] + ' ' * (mx_len - len(i[0])) + ' | ' + str(i[1]))
+else:
+    for i in top:
+        print(f'{i[0]}:{i[1]}')
+```
+![Картинка 02](./images/lab03/imgB.png)
