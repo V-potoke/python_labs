@@ -223,7 +223,7 @@ def top_n(freq, n):
         top_n.append(freq[i])
     return top_n
 ```
-![Картинка 01](./images/lab03/imgA.png)
+![Картинка 01](./images/lab03/A.png)
 
 ### Задание номер B
 ``` python
@@ -245,4 +245,4 @@ else:
     for i in top:
         print(f'{i[0]}:{i[1]}')
 ```
-![Картинка 02](./images/lab03/imgB.png)
+![Картинка 02](./images/lab03/B.png)
