@@ -62,3 +62,130 @@ for i in range(n):
 print(ochno, zaochno)
 ```
 ![Картинка 6](./images/lab01/img06.png)
+
+
+
+## Лабораторная работа 2
+
+### Задание номер 1
+``` python
+def min_max(a):
+    if not a:
+        return ValueError
+    return (min(a), max(a))
+
+
+def unique_sorted(a):
+    return sorted(set(a))
+
+
+def flatten(a):
+    row_major = []
+    fl = False
+    for a1 in a:
+        if not isinstance(a1, (list, tuple)):
+            fl = True
+            break
+        for i in range(len(a1)):
+            row_major.append(a1[i])
+    if fl:
+        return TypeError
+    return row_major
+
+
+print('min_max')
+print(min_max([3, -1, 5, 5, 0]))
+print(min_max([42]))
+print(min_max([-5, -2, -9]))
+print(min_max([]))
+print(min_max([1.5, 2, 2.0, -3.1]))
+print('unique_sorted')
+print(unique_sorted([3, 1, 2, 1, 3]))
+print(unique_sorted([]))
+print(unique_sorted([-1, -1, 0, 2, 2]))
+print(unique_sorted([1.0, 1, 2.5, 2.5, 0]))
+print('flatten')
+print(flatten([[1, 2], [3, 4]]))
+print(flatten([[1, 2], (3, 4, 5)]))
+print(flatten([[1], [], [2, 3]]))
+print(flatten([[1, 2], "ab"]))
+```
+![Картинка 01](./images/lab02/img01.png)
+
+### Задание номер 2
+``` python
+def transpose(a):
+    if a == []:
+        return []
+    if len(set(len(a1) for a1 in a)) != 1:
+        return ValueError
+    a_res = []
+    for i in range(len(a[0])):
+        new_list = []
+        for k in range(len(a)):
+            new_list.append(a[k][i])
+        a_res.append(new_list)
+    return a_res
+
+
+def row_sums(a):
+    if len(set(len(a1) for a1 in a)) != 1:
+        return ValueError
+    return [sum(a1) for a1 in a]
+
+
+def col_sums(a):
+    if a == []:
+        return []
+    if len(set(len(a1) for a1 in a)) != 1:
+        return ValueError
+    a_res = []
+    for i in range(len(a[0])):
+        new_list = []
+        for k in range(len(a)):
+            new_list.append(a[k][i])
+        a_res.append(new_list)
+    return [sum(a1) for a1 in a_res]
+
+
+print('transpose')
+print(transpose([[1, 2, 3]]))
+print(transpose([[1], [2], [3]]))
+print(transpose([[1, 2], [3, 4]]))
+print(transpose([]))
+print(transpose([[1, 2], [3]]))
+print('row_sums')
+print(row_sums([[1, 2, 3], [4, 5, 6]]))
+print(row_sums([[-1, 1], [10, -10]]))
+print(row_sums([[0, 0], [0, 0]]))
+print(row_sums([[1, 2], [3]]))
+print('col_sums')
+print(col_sums([[1, 2, 3], [4, 5, 6]]))
+print(col_sums([[-1, 1], [10, -10]]))
+print(col_sums([[0, 0], [0, 0]]))
+print(col_sums([[1, 2], [3]]))
+```
+![Картинка 02](./images/lab02/img02.png)
+
+### Задание номер 3
+``` python
+def format_record(t):
+    fio, group, gpa = t[0].strip(), t[1].strip(), round(t[2], 2)
+    if not (len(fio.split()) == 2 or len(fio.split()) == 3) or group == '':
+        return ValueError
+    if not isinstance(gpa, float):
+        return TypeError
+    if len(fio.split()) == 3:
+        l1, l2 = fio.split()[1], fio.split()[2]
+        return fio.split()[0].capitalize() + ' ' + l1[0].upper() + '. ' + l2[0].upper() + '., гр. ' + group + ', GPA ' + f'{gpa:.2f}'
+    else:
+        l1 = fio.split()[1]
+        return fio.split()[0].capitalize() + ' ' + l1[0].upper() + '., гр. ' + group + ', GPA ' + f'{gpa:.2f}'
+
+
+print(format_record(("Иванов Иван Иванович", "BIVT-25", 4.6)))
+print(format_record(("Петров Пётр", "IKBO-12", 5.0)))
+print(format_record(("Петров Пётр Петрович", "IKBO-12", 5.0)))
+print(format_record(("  сидорова  анна   сергеевна ", "ABB-01", 3.999)))
+```
+![Картинка 03](./images/lab02/img03.png)
