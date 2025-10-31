@@ -1,9 +1,9 @@
 def format_record(t):
     fio, group, gpa = t[0].strip(), t[1].strip(), round(t[2], 2)
     if not (len(fio.split()) == 2 or len(fio.split()) == 3) or group == '':
-        return ValueError
+        raise ValueError('Некорректная запись')
     if not isinstance(gpa, float):
-        return TypeError
+        raise TypeError('Неверный тип GPA')
     if len(fio.split()) == 3:
         l1, l2 = fio.split()[1], fio.split()[2]
         return fio.split()[0].capitalize() + ' ' + l1[0].upper() + '. ' + l2[0].upper() + '., гр. ' + group + ', GPA ' + f'{gpa:.2f}'
