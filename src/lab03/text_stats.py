@@ -1,8 +1,5 @@
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from src.lib.text import count_freq, top_n, normalize, tokenize
-
+import sys
 NICE_CONCLUSION = True
 text = sys.stdin.read()
 text = normalize(text)

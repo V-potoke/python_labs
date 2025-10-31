@@ -21,7 +21,7 @@ def count_freq(tokens):
     return t
 
 
-def top_n(freq, n: int = 5):
+def top_n(freq, n):
     top_n = []
     freq = sorted(freq.items(), key=lambda item: [-item[1], item[0]])
     for i in range(min(n, len(freq))):
