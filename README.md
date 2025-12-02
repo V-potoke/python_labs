@@ -189,3 +189,610 @@ print(format_record(("Петров Пётр Петрович", "IKBO-12", 5.0)))
 print(format_record(("  сидорова  анна   сергеевна ", "ABB-01", 3.999)))
 ```
 ![Картинка 03](./images/lab02/img03.png)
+
+
+
+## Лабораторная работа 3
+
+### Задание A
+``` python
+import re
+
+
+def normalize(text: str, *, casefold: bool = True, yo2e: bool = True):
+    if casefold: text = text.casefold()
+    if yo2e: text = text.replace('Ё', 'Е').replace('ё', 'е')
+    text = text.replace('\t', ' ').replace('\r', ' ').replace('\n', ' ').strip()
+    while '  ' in text: text = text.replace('  ', ' ')
+    return text
+
+
+def tokenize(text):
+    return re.findall(r'\w+[-]\w+|\w+', text.lower())
+
+
+def count_freq(tokens):
+    t = {}
+    while tokens:
+        t[tokens[0]] = tokens.count(tokens[0])
+        tokens = [x for x in tokens if x != tokens[0]]
+    return t
+
+
+def top_n(freq, n):
+    top_n = []
+    freq = sorted(freq.items(), key=lambda item: [-item[1], item[0]])
+    for i in range(min(n, len(freq))):
+        top_n.append(freq[i])
+    return top_n
+```
+![Картинка 03](./images/lab03/A.png)
+
+### Задание B
+``` python
+from src.lib.text import count_freq, top_n, normalize, tokenize
+import sys
+NICE_CONCLUSION = True
+text = sys.stdin.read()
+text = normalize(text)
+tokens = tokenize(text)
+top = top_n(count_freq(tokens), len(tokens))
+print(f'Всего слов: {len(tokens)}')
+print(f'Уникальных слов: {len(set(tokens))}')
+print('Топ-5:')
+if NICE_CONCLUSION:
+    mx_len = max(5, len(max(tokens, key=len)))
+    print('слово' + ' ' * (mx_len - 5) + ' | ' + 'частота')
+    print('-' * (mx_len + 10))
+    for i in top:
+        print(i[0] + ' ' * (mx_len - len(i[0])) + ' | ' + str(i[1]))
+else:
+    for i in top:
+        print(f'{i[0]}:{i[1]}')
+
+```
+![Картинка 03](./images/lab03/B.png)
+
+
+
+## Лабораторная работа 4
+
+### Задание A
+``` python
+from pathlib import Path
+
+
+def ensure_parent_dir(path: Path | str) -> None:
+    p = Path(path)
+    parent_dir = p.parent
+
+    '''
+    Создаёт родительские директории для указанного пути, если их ещё нет.
+
+    Аргументы:
+        path: путь к файлу (строка или pathlib.Path).
+    '''
+
+    parent_dir.mkdir(parents=True, exist_ok=True)
+
+
+def read_text(path: str | Path, encoding: str = "utf-8") -> str:
+    p = Path(path)  # Создаем путь к файлу - Path-объект
+
+    '''
+    Открывает текстовый файл и возвращает его содержимое как одну строку.
+
+    Аргументы:
+        path: путь к файлу (строка или pathlib.Path).
+        encoding: кодировка файла (по умолчанию "utf-8").
+                  Если нужна другая, можно указать, например: encoding="cp1251".
+
+    Возвращает:
+        str: содержимое файла.
+
+    Падает с ошибками:
+        FileNotFoundError: если файл не найден.
+    '''
+
+    if not p.exists():
+        raise FileNotFoundError('Файл не найден')
+
+    return p.read_text(encoding=encoding)
+
+
+import csv
+from typing import Iterable, Sequence
+
+
+def write_csv(rows: Iterable[Sequence], path: str | Path, header: tuple[str, ...] | None = None) -> None:
+    p = Path(path)  # Создаем путь
+    rows = list(rows)
+
+    '''
+    Создать или перезаписать CSV-файл с разделителем ','.
+
+    Аргументы:
+        rows: последовательность строк (каждая строка — tuple или list).
+        path: путь к CSV-файлу (строка или pathlib.Path).
+        header: необязательный заголовок (tuple[str,...]), будет записан первой строкой.
+
+    Падает с ошибками:
+        ValueError: если не все из строк в rows имеют одинаковую длину.
+    '''
+
+    with p.open('w', newline='', encoding='utf-8') as f:
+        w = csv.writer(f)  # Создание объекта writer для записи в csv формат
+        if header is not None:
+            w.writerow(header)  # Записываем заголовок, если такой существует
+
+        if rows:  # Проверка не равную длину строк
+            for r in rows:
+                if len(r) != len(rows[0]):
+                    raise ValueError("Строки имеют разную длину!")
+
+        for r in rows:
+            w.writerow(r)  # Записывает ряды построчно
+```
+![Картинка 03](./images/lab04/A_1.png)
+![Картинка 03](./images/lab04/A_2.png)
+![Картинка 03](./images/lab04/A_3.png)
+![Картинка 03](./images/lab04/A_4.png)
+
+### Задание B
+``` python
+from src.lib.text import normalize, tokenize, count_freq, top_n
+from src.lab04.io_txt_csv import read_text, write_csv
+
+txt = read_text('C:/Users/vende/PycharmProjects/python_labs/data/lab04/input.txt', 'cp1251')
+txt = tokenize(normalize(txt))
+txt_counts = top_n(count_freq(txt))
+print('Всего слов:', len(txt))
+print('Уникальных слов:', len(set(txt)))
+print('Топ-5:')
+for i in txt_counts:
+    print( f'{i[0]}:{i[1]}')
+
+write_csv(txt_counts,
+          'C:/Users/vende/PycharmProjects/python_labs/data/lab04/report.csv',
+          ("word","count"))
+```
+![Картинка 03](./images/lab04/B_1.png)
+![Картинка 03](./images/lab04/B_2.png)
+![Картинка 03](./images/lab04/B_3.png)
+
+
+
+## Лабораторная работа 5
+
+### Задание A
+``` python
+import csv
+import json
+from pathlib import Path
+
+
+def json_to_csv(json_path: str, csv_path: str) -> None:
+    json_path = Path(json_path)
+
+    if json_path.exists() == False:
+        raise FileNotFoundError
+
+    if len(json_path.read_text(encoding="utf-8")) <= 0:
+        raise ValueError
+
+    with json_path.open("r", newline="", encoding='utf-8') as f:
+        json_import = json.load(f)
+
+    csv_path = Path(csv_path)
+
+    with csv_path.open("w", newline="", encoding="utf-8") as f:
+        csv_writer = csv.DictWriter(f, fieldnames=["name", 'age'])
+
+        csv_writer.writeheader()
+        csv_writer.writerows(json_import)
+
+    """
+        Преобразует JSON-файл в CSV.
+        Поддерживает список словарей [{...}, {...}], заполняет отсутствующие поля пустыми строками.
+        Кодировка UTF-8. Порядок колонок — как в первом объекте или алфавитный.
+    """
+
+
+def csv_to_json(csv_path: str, json_path: str) -> None:
+    json_path = Path(json_path)
+    csv_path = Path(csv_path)
+
+    if csv_path.exists() == False:
+        raise FileNotFoundError
+
+    if len(csv_path.read_text(encoding="utf-8")) <= 0:
+        raise ValueError
+
+    list_line_csv = []
+
+    with csv_path.open('r', encoding='utf-8') as f:
+        csv_read = csv.DictReader(f)
+        for line in csv_read:
+            list_line_csv.append(line)
+
+    with json_path.open("w", newline='', encoding="utf-8") as f:
+        json_writer = json.dump(list_line_csv, f, ensure_ascii=False, indent=2)
+
+    """
+    Преобразует CSV в JSON (список словарей).
+    Заголовок обязателен, значения сохраняются как строки.
+    json.dump(..., ensure_ascii=False, indent=2)
+    """
+```
+![Картинка 03](./images/lab05/A_1.png)
+![Картинка 03](./images/lab05/A_2.png)
+
+### Задание B
+``` python
+import openpyxl
+from pathlib import Path
+import csv
+
+
+def csv_to_xlsx(csv_path: str, xlsx_path: str) -> None:
+    """
+    Конвертирует CSV в XLSX.
+    Использовать openpyxl ИЛИ xlsxwriter.
+    Первая строка CSV — заголовок.
+    Лист называется "Sheet1".
+    Колонки — автоширина по длине текста (не менее 8 символов).
+    """
+    csv_path = Path(csv_path)
+    xlsx_path = Path(xlsx_path)
+
+    if csv_path.exists() == False:
+        raise FileNotFoundError
+
+    if len(csv_path.read_text(encoding="utf-8")) <= 0:
+        return ""
+
+    xlsx_book = openpyxl.Workbook()
+    xlsx_sheet1 = xlsx_book.active
+    xlsx_sheet1.title = "Sheet1"
+
+    with csv_path.open('r', encoding='utf-8') as f:
+        csv_read = csv.reader(f)
+
+        for row in csv_read:
+            xlsx_sheet1.append(row)
+
+    xlsx_book.save(xlsx_path)
+```
+![Картинка 03](./images/lab05/B.png)
+
+
+
+## Лабораторная работа 6
+
+### Задание 
+``` python
+import argparse
+from pathlib import Path
+from src.lib.text import tokenize, count_freq, top_n
+
+
+def main():
+    parser = argparse.ArgumentParser(description='CLI-утилиты лабораторной №6')
+    '''Создает основной парсер аргументов с описанием'''
+    subparsers = parser.add_subparsers(dest='command')
+    '''Создает подкоманды - в дальнейшем cat и stats'''
+
+    # Подкоманда cat - утилита для просмотра содержимого текстовых файлов в терминале.
+    cat_parser = subparsers.add_parser("cat", help="Вывести содержимое файла")
+    cat_parser.add_argument("--input", required=True, help="Путь к входному файлу")
+    cat_parser.add_argument("-n", action="store_true", help="Нумеровать строки")
+    '''action="store_true" - если флаг указан, значение становится True, иначе False'''
+
+    # Подкоманда stats - утилита для адализа текстовой статистики
+    stats_parser = subparsers.add_parser("stats", help="Частоты слов")
+    stats_parser.add_argument("--input", required=True)
+    stats_parser.add_argument("--top", type=int, default=5)
+    '''type=int - автоматически преобразует введенное значение в число, по дефолту
+       выводит топ-5'''
+
+    args = parser.parse_args()  # "Анализирует" значения на входе
+
+    file = Path(args.input)
+
+    if args.command == "cat":
+        with open(file, 'r', encoding='utf-8') as f:
+            count = 1
+            for line in f:  # Построчное чтение файла
+                line = line.rstrip("\n")  # Очищаем строку от символа переноса
+                if args.n:  # Если указан флаг -n, то проводим нумерацию строк
+                    print(f'{count}: {line}')
+                    count += 1
+                else:
+                    print(line)
+
+    elif args.command == 'stats':
+        with open(file, 'r', encoding='utf-8') as f:
+            file = [i for i in f]
+            tokens = tokenize(''.join(file))
+            freq = count_freq(tokens)
+            top = top_n(freq, n=args.top)
+            '''Работаем с входными данными'''
+
+            num = 1
+
+            for word, count in top:
+                print(f'{num}. {word} - {count}')
+                num += 1
+
+
+# Точка - запуск программы
+if __name__ == "__main__":
+    main()
+```
+![Картинка 03](./images/lab06/A_1.png)
+![Картинка 03](./images/lab06/A_2.png)
+
+### Задание 
+``` python
+import argparse
+from src.lab05.json_csv import json_to_csv
+from src.lab05.json_csv import csv_to_json
+from src.lab05.csv_xlsx import csv_to_xlsx
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Конвертеры данных")
+    sub = parser.add_subparsers(dest="command")
+
+    p1 = sub.add_parser("json2csv")
+    p1.add_argument("--in", dest="input", required=True)
+    p1.add_argument("--out", dest="output", required=True)
+
+    p2 = sub.add_parser("csv2json")
+    p2.add_argument("--in", dest="input", required=True)
+    p2.add_argument("--out", dest="output", required=True)
+
+    p3 = sub.add_parser("csv2xlsx")
+    p3.add_argument("--in", dest="input", required=True)
+    p3.add_argument("--out", dest="output", required=True)
+
+    args = parser.parse_args() # "Анализирует" значения на входе
+
+    if args.command == "json2csv":
+        # Python -m src.lab06.cli_convert json2csv --in data/samples/people.json --out data/out/people_from_json.csv
+        json_to_csv(json_path=args.input, csv_path=args.output)
+
+    if args.command == "csv2json":
+        # Python -m src.lab06.cli_convert csv2json --in data/samples/people.csv --out data/out/people_from_csv.json
+        csv_to_json(csv_path=args.input, json_path=args.output)
+
+    if args.command == "csv2xlsx":
+        # Python -m src.lab06.cli_convert csv2xlsx --in data/samples/cities.csv --out data/out/cities.xlsx
+        csv_to_xlsx(csv_path=args.input, xlsx_path=args.output)
+
+if __name__ == "__main__":
+    main()
+```
+![Картинка 03](./images/lab06/B.png)
+
+
+
+## Лабораторная работа 7
+
+### Задание 
+``` python
+import pytest
+from src import *
+
+""" Проводим параметризацию, далее - для каждого теста. """
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        ("ПрИвЕт\nМИр\t", "привет мир"),
+        ("ёжик, Ёлкa", "ежик, елкa"),
+        ("Hello\r\nWorld", "hello world"),
+        ("  двойные   пробелы  ", "двойные пробелы"),
+        ("", "")
+    ],
+)
+def test_normalize_basic(source, expected):
+    assert normalize(source) == expected
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        ("привет, мир!", ["привет", "мир"]),
+        ("по-настоящему круто", ["по-настоящему", "круто"]),  # работа с дефисом
+        ("2025 год", ["2025", "год"]),  # чтение
+        ("emoji 😀 не слово", ["emoji", "не", "слово"]),  # удаление эмоджи
+        ("    мноооооого ненужного!!", ["мноооооого", "ненужного"]),
+        ("", [])  # пустой -> пустой
+    ],
+)
+def test_tokenize_basic(source, expected):
+    assert tokenize(source) == expected
+
+
+@pytest.mark.parametrize(
+    "tokens, expected",
+    [
+        (["a", "b", "a", "c", "b", "a"], {"a": 3, "b": 2, "c": 1}),
+        ([], {}),  # пустой -> пустой
+        (["test", "test", "test"], {"test": 3}),  # одинаковые слова
+        (["🌍", "🚀", "🌍"], {"🌍": 2, "🚀": 1})  # обработка эмодзи
+    ],
+)
+def test_count_freq_and_top_n(tokens, expected):
+    assert count_freq(tokens) == expected
+
+
+@pytest.mark.parametrize(
+    "words, n, expected",
+    [
+        ({"b": 5, "a": 5, "c": 3, "d": 2}, 2, [("a", 5), ("b", 5)]),  # равные значения -> по алфавиту
+        ({"x": 10}, 5, [("x", 10)]),  # n > dicts
+        ({}, 3, []),  # пустой -> пустой
+        ({"a": 1, "b": 1}, 0, []),  # n = 0
+    ]
+)
+def test_top_n_tie_breaker(words, n, expected):
+    assert top_n(words, n) == expected
+```
+![Картинка 03](./images/lab07/A.png)
+
+### Задание 
+``` python
+import pytest
+from pathlib import Path
+import sys
+import json, csv
+from src.lab05.json_csv import json_to_csv, csv_to_json
+
+"""
+С помощью фикстуры tmp_path создаём временные файлы для чтения и записы данных.
+1 тест - проверка правильности записи базового случая
+"""
+
+
+def test_json_to_csv_roundtrip(tmp_path: Path):
+    src = tmp_path / "people.json"
+    dst = tmp_path / "people.csv"
+    data = [
+        {"name": "Alice", "age": 22},
+        {"name": "Bob", "age": 25},
+    ]
+    src.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    json_to_csv(str(src), str(dst))
+
+    with dst.open(encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+
+    assert len(rows) == 2
+    assert {"name", "age"} <= set(rows[0].keys())
+
+
+"""Пустой файл"""
+
+
+def test_json_to_csv_empty_file(tmp_path: Path):
+    src = tmp_path / "people.json"
+    dst = tmp_path / "people.csv"
+    data = []
+    src.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Пустой файл"):
+        json_to_csv(str(src), str(dst))
+
+
+"""Несуществующий путь"""
+
+
+def test_json_to_csv_empty_file(tmp_path: Path):
+    src = tmp_path / "nothing.json"
+    dst = tmp_path / "people.csv"
+
+    with pytest.raises(FileNotFoundError, match="Путь не найден"):
+        json_to_csv(str(src), str(dst))
+
+
+"""1 проверка формата"""
+
+
+def test_json_to_csv_not_list(tmp_path: Path):
+    src = tmp_path / "people.json"
+    dst = tmp_path / "people.csv"
+    data = {"name": "Alice", "age": 22}
+
+    src.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Файл не JSON формата: не список словарей"):
+        json_to_csv(str(src), str(dst))
+
+
+"""2 проверка формата"""
+
+
+def test_json_to_csv_not_dict(tmp_path: Path):
+    src = tmp_path / "people.json"
+    dst = tmp_path / "people.csv"
+    data = ['name": "Alice", "age": 22', 'name": "Bob", "age": 25']
+
+    src.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Файл не JSON формата: в списке не словари"):
+        json_to_csv(str(src), str(dst))
+
+
+"""Аналогично для обратного перевода"""
+
+
+def test_csv_to_json_roundtrip(tmp_path: Path):
+    src = tmp_path / "people.csv"
+    dst = tmp_path / "people.json"
+
+    csv_data = """name,age,city,email
+Анна Иванова,28,Москва,anna@example.com
+Петр Сидоров,35,Санкт-Петербург,petr@example.com"""
+
+    src.write_text(csv_data, encoding="utf-8")
+
+    csv_to_json(str(src), str(dst))
+
+    with dst.open('r', encoding="utf-8") as f:
+        data = json.load(f)
+
+    # Проверка
+    assert isinstance(data, list)
+    assert len(data) == 2
+    assert isinstance(data[0], dict)
+    assert isinstance(data[1], dict)
+
+
+# Бро вот еще тесты и тд
+
+"""Пустой файл"""
+
+
+def test_csv_to_json_empty_file(tmp_path: Path):
+    src = tmp_path / "people.csv"
+    dst = tmp_path / "people.json"
+
+    csv_data = ""
+
+    src.write_text(csv_data, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Пустой файл"):
+        csv_to_json(str(src), str(dst))
+
+
+"""Несуществующий файл"""
+
+
+def test_csv_to_json_empty_file(tmp_path: Path):
+    src = tmp_path / "nothing.csv"
+    dst = tmp_path / "people.json"
+
+    with pytest.raises(FileNotFoundError, match="Файл не найден"):
+        csv_to_json(str(src), str(dst))
+
+
+"""Не тот формат файла"""
+
+
+def test_csv_to_json_type(tmp_path: Path):
+    src = tmp_path / "input.txt"
+    dst = tmp_path / "people.json"
+
+    txt_data = """name,age,city,email
+Анна Иванова,28,Москва,anna@example.com
+Петр Сидоров,35,Санкт-Петербург,petr@example.com"""
+
+    src.write_text(txt_data, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Неверный тип файла"):
+        csv_to_json(str(src), str(dst))
+```
+![Картинка 03](./images/lab07/B.png)
