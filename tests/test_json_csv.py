@@ -1,6 +1,5 @@
 import pytest
 from pathlib import Path
-import sys
 import json, csv
 from src.lab05.json_csv import json_to_csv, csv_to_json
 
