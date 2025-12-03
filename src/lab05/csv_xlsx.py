@@ -18,7 +18,7 @@ def csv_to_xlsx(csv_path: str, xlsx_path: str) -> None:
         raise FileNotFoundError
 
     if len(csv_path.read_text(encoding="utf-8")) <= 0:
-        raise ValueError
+        return ""
 
     xlsx_book = openpyxl.Workbook()
     xlsx_sheet1 = xlsx_book.active
