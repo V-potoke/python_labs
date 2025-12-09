@@ -915,3 +915,257 @@ def students_from_json(path: str):
     return stud_list
 ```
 ![Картинка 03](./images/lab08/B.png)
+
+
+
+## Лабораторная работа 9
+
+### Задание A
+``` python
+class Group:
+    def __init__(self, storage_path: str):
+        self.path = Path(storage_path)
+        self._ensure_storage_exists()
+
+    def _ensure_storage_exists(self):
+        """Создаёт CSV-файл с заголовком, если его нет."""
+        if not self.path.exists():
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with self.path.open("w", encoding="utf-8", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["fio", "birthdate", "group", "gpa"])
+
+    def _read_all(self):
+        "Читает все строки CSV как список словарей."
+        rows = []
+        with self.path.open("r", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f, fieldnames=["fio", "birthdate", "group", "gpa"])
+            if reader.fieldnames != ["fio", "birthdate", "group", "gpa"]:
+                print(reader.fieldnames)
+                raise ValueError("Неверный заголовок CSV-файла")
+            for row in reader:
+                key_check = True
+                for key, value in row.items():
+                    if key != value:
+                        key_check = False
+                if key_check:
+                    continue
+                rows.append(row)
+        return rows
+
+    def _write_all(self, rows):
+        "Перезаписывает CSV полностью."
+        with self.path.open("w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=["fio", "birthdate", "group", "gpa"])
+            writer.writeheader()
+            for r in rows:
+                writer.writerow(r)
+
+    def list(self):
+        "Возвращает список Student."
+        rows = self._read_all()
+        students = []
+        for r in rows:
+            r2 = {
+                "fio": r["fio"],
+                "birthdate": r["birthdate"],
+                "group": r["group"],
+                "gpa": float(r["gpa"])
+            }
+            students.append(Student.from_dict(r2))
+        return students
+
+    def add(self, student: Student):
+        "Добавить студента в CSV."
+        rows = self._read_all()
+        row = student.to_dict()
+        row["gpa"] = str(row["gpa"])
+        rows.append(row)
+        self._write_all(rows)
+
+    def find(self, substr: str):
+        "Поиск по подстроке в ФИО (без учета регистра)."
+        rows = self._read_all()
+        substr = substr.lower()
+        found = []
+        for r in rows:
+            if substr in r["fio"].lower():
+                r2 = {
+                    "fio": r["fio"],
+                    "birthdate": r["birthdate"],
+                    "group": r["group"],
+                    "gpa": float(r["gpa"])
+                }
+                found.append(Student.from_dict(r2))
+        return found
+
+    def remove(self, fio: str):
+        "Удаляет запись по точному ФИО. Возвращает количество удалённых."
+        rows = self._read_all()
+        new_rows = [r for r in rows if r["fio"] != fio]
+        removed = len(rows) - len(new_rows)
+
+        if removed:
+            self._write_all(new_rows)
+
+        return removed
+    def update(self, fio: str, **fields):
+
+        rows = self._read_all()
+        for r in rows:
+            if r["fio"] == fio:
+                r.update({k: str(v) for k, v in fields.items()})
+        self._write_all(rows)
+```
+![Картинка 01](./images/lab09/A.png)
+
+
+
+## Лабораторная работа 10
+
+### Задание A
+``` python
+class Stack:
+    def __init__(self):
+        self._data = []
+
+    def push(self, item):
+        self._data.append(item)
+
+    def pop(self):
+        if self.is_empty():
+            raise IndexError("pop from empty stack")
+        return self._data.pop()
+
+    def peek(self):
+        if self.is_empty():
+            return None
+        return self._data[-1]
+
+    def is_empty(self) -> bool:
+        return len(self._data) == 0
+
+    def __len__(self):
+        return len(self._data)
+
+    def __repr__(self):
+        return f"Stack({self._data})"
+
+
+class Queue:
+    def __init__(self):
+        self._data = deque()
+
+    def enqueue(self, item):
+        self._data.append(item)
+
+    def dequeue(self):
+        if self.is_empty():
+            raise IndexError("dequeue from empty queue")
+        return self._data.popleft()
+
+    def peek(self):
+        if self.is_empty():
+            return None
+        return self._data[0]
+
+    def is_empty(self) -> bool:
+        return len(self._data) == 0
+
+    def __len__(self):
+        return len(self._data)
+
+    def __repr__(self):
+        return f"Queue({list(self._data)})"
+```
+![Картинка 01](./images/lab10/A.png)
+
+### Задание B
+``` python
+class Node:
+
+    def __init__(self, value, next=None):
+        self.value = value
+        self.next = next
+
+    def __repr__(self):
+        return f"Node({self.value})"
+
+
+class SinglyLinkedList:
+
+    def __init__(self):
+        self.head = None
+        self._size = 0
+
+    def append(self, value):
+        new_node = Node(value)
+        if self.head is None:
+            self.head = self.tail = new_node
+        else:
+            self.tail.next = new_node
+            self.tail = new_node
+
+        self._size += 1
+
+    def prepend(self, value):
+        new_node = Node(value, self.head)
+        self.head = new_node
+        if self._size == 0:
+            self.tail = new_node
+        self._size += 1
+
+    def insert(self, idx: int, value):
+        if idx < 0 or idx > self._size:
+            raise IndexError("index out of range")
+
+        if idx == 0:
+            self.prepend(value)
+            return
+
+        if idx == self._size:
+            self.append(value)
+            return
+
+        current = self.head
+        for _ in range(idx - 1):
+            current = current.next
+
+        new_node = Node(value, current.next)
+        current.next = new_node
+        self._size += 1
+
+    def remove_at(self, idx: int):
+        if idx < 0 or idx >= self._size:
+            raise IndexError("index out of range")
+
+        if idx == 0:
+            self.head = self.head.next
+            if self._size == 1:
+                self.tail = None
+            self._size -= 1
+            return
+
+        current = self.head
+        for _ in range(idx - 1):
+            current = current.next
+
+        current.next = current.next.next
+        if idx == self._size - 1:
+            self.tail = current
+
+        self._size -= 1
+
+    def __iter__(self):
+        cur = self.head
+        while cur:
+            yield cur.value
+            cur = cur.next
+
+    def __len__(self):
+        return self._size
+
+    def __repr__(self):
+        return f"SinglyLinkedList({list(self)})"
+```
+![Картинка 02](./images/lab10/B.png)

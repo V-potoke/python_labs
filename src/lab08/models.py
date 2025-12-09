@@ -1,7 +1,5 @@
-from dataclasses import dataclass
 from datetime import datetime, date
-
-
+from dataclasses import dataclass
 @dataclass
 class Student:
     fio: str
@@ -10,48 +8,47 @@ class Student:
     gpa: float
 
     def __post_init__(self):
-        # Валидация формата даты
+        #  Валидация birthdate
         try:
             datetime.strptime(self.birthdate, "%Y-%m-%d")
         except ValueError:
-            raise ValueError("Неверная запись времени")
+            raise ValueError(f"Неверный формат даты: {self.birthdate}. Ожидается YYYY-MM-DD")
 
-        # Валидация диапазона GPA
+        #  Валидация GPA
         if not (0 <= self.gpa <= 5):
-            raise ValueError("GPA должен находиться между 0 и 5")
+            raise ValueError(f"GPA должен быть в диапазоне 0..5, получено: {self.gpa}")
 
+    # Возраст студента
     def age(self) -> int:
-        """Возвращает количество полных лет"""
-        birth_day = datetime.strptime(self.birthdate, "%Y-%m-%d").date()
+        birth = datetime.strptime(self.birthdate, "%Y-%m-%d").date()
         today = date.today()
-        if birth_day > today:
-            raise ValueError("Студент еще не родился")
-        if today.month < birth_day.month or (
-                today.month == birth_day.month and today.day < birth_day.day
-        ):
-            return today.year - birth_day.year - 1
-        return today.year - birth_day.year
-
+        years = today.year - birth.year
+        if (today.month, today.day) < (birth.month, birth.day):
+            years -= 1
+        return years
+    # Сериализация
     def to_dict(self) -> dict:
         return {
-            "Студент": self.fio,
-            "Группа": self.group,
-            "Дата рождения": self.birthdate,
-            "Средний балл": self.gpa,
+            "fio": self.fio,
+            "birthdate": self.birthdate,
+            "group": self.group,
+            "gpa": self.gpa
         }
 
-    @classmethod  # Метод создаёт новый объект из существующих данных
+
+    # Десериализация
+
+    @classmethod
     def from_dict(cls, d: dict):
-        # Создание объекта класса Student из словаря
         return cls(
-            fio=d['Студент'], group=d["Группа"], birthdate=d["Дата рождения"], gpa=d["Средний балл"]
+            fio=d["fio"],
+            birthdate=d["birthdate"],
+            group=d["group"],
+            gpa=d["gpa"]
         )
 
     def __str__(self):
-        return (f"Студент: {self.fio};\n"
-                f"Группа: {self.group};\n"
-                f"Дата рождения: {self.birthdate};\n"
-                f"Средний балл: {self.gpa}.")
+        return f"{self.fio} ({self.group}), возраст: {self.age()}, GPA: {self.gpa}"
 
 
 if __name__ == "__main__":
